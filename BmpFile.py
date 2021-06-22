@@ -1,6 +1,5 @@
 import cv2
 from skimage.io import imread, imshow
-from skimage.color import rgb2hsv, rgb2gray, rgb2yuv, rgba2rgb
 
 from more_itertools import chunked
 
@@ -9,8 +8,8 @@ import matplotlib.pyplot as plt
 from skimage import io
 
 from constants import BITMAPV5HEADER, BITMAPFILEHEADER_SIZE, COMPRESSION_METHODS, HALFTONING_ALGORITHMS, DIB_HEADERS, \
-    COLOR_PROFILE, DIB_HEADERS_TO_ATTRIBUTES, BITMAPCOREHEADER, ATTRIBUTES_TO_DELETE
-from utilities import binary_little_endian_to_int, binary_to_string, binary_big_endian_to_int
+    COLOR_PROFILE, DIB_HEADERS_TO_ATTRIBUTES, ATTRIBUTES_TO_DELETE
+from utilities import binary_little_endian_to_int
 
 
 class BmpFile:
@@ -63,23 +62,6 @@ class BmpFile:
             else:
                 print(f"{key} = {attribute_value}")
 
-    def print_color_profile(self):
-        array = BmpFile.open_file(self)
-
-        if self.get_dib_header_size() >= 124 and self.get_dict_value('ICC profile size', BITMAPV5HEADER) > 0:
-            ICC_offset = self.get_dict_value('ICC profile data offset', BITMAPV5HEADER)
-            ICC_size = self.get_dict_value('ICC profile size', BITMAPV5HEADER)
-
-            offset = ICC_offset + BITMAPFILEHEADER_SIZE
-            ICC_data = array[offset:offset + ICC_size]
-
-            for key, value in COLOR_PROFILE.items():
-                offset, size, function = value
-                attribute_value = function(ICC_data[offset:(offset + size)])
-                print(f"{key} = {attribute_value}")
-        else:
-            print('No color profile found')
-
     def fourier(self):
         img = cv2.imread(self.file_name, 0)
 
@@ -109,7 +91,6 @@ class BmpFile:
 
         if self.get_dib_header_size() > 124 and self.get_dict_value('ICC profile size', BITMAPV5HEADER) > 0:
             ICC_offset = self.get_dict_value('ICC profile data offset', BITMAPV5HEADER)
-            ICC_size = self.get_dict_value('ICC profile size', BITMAPV5HEADER)
             full_offset = ICC_offset + BITMAPFILEHEADER_SIZE
 
             for key, value in COLOR_PROFILE.items():
@@ -150,3 +131,20 @@ class BmpFile:
             plt.show()
         else:
             print('No color pallete found')
+
+    def print_color_profile(self):
+        array = BmpFile.open_file(self)
+
+        if self.get_dib_header_size() >= 124 and self.get_dict_value('ICC profile size', BITMAPV5HEADER) > 0:
+            ICC_offset = self.get_dict_value('ICC profile data offset', BITMAPV5HEADER)
+            ICC_size = self.get_dict_value('ICC profile size', BITMAPV5HEADER)
+
+            offset = ICC_offset + BITMAPFILEHEADER_SIZE
+            ICC_data = array[offset:offset + ICC_size]
+
+            for key, value in COLOR_PROFILE.items():
+                offset, size, function = value
+                attribute_value = function(ICC_data[offset:(offset + size)])
+                print(f"{key} = {attribute_value}")
+        else:
+            print('No color profile found')

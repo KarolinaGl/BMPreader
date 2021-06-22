@@ -9,6 +9,9 @@ BITMAPFILEHEADER = {
 }
 
 BITMAPCOREHEADER = {
+    'header field': (0, 2, binary_to_string),
+    'file size in bytes': (2, 4, binary_little_endian_to_int),
+    'offset': (10, 4, binary_little_endian_to_int),
     'size of DIB header': (14, 4, binary_little_endian_to_int),
     'width': (18, 2, binary_little_endian_to_int),
     'height': (20, 2, binary_little_endian_to_int),
@@ -89,6 +92,13 @@ BITMAPV5HEADER = {
     'reserved': (134, 4, binary_little_endian_to_int),
 }
 
+DIB_HEADERS_TO_ATTRIBUTES = {
+    12: BITMAPCOREHEADER,
+    40: BITMAPINFOHEADER,
+    108: BITMAPV4HEADER,
+    124: BITMAPV5HEADER,
+}
+
 COMPRESSION_METHODS = {
     0: 'BI_RGB',
     1: 'BI_RLE8',
@@ -118,13 +128,6 @@ DIB_HEADERS = {
     56: 'BITMAPV3INFOHEADER',
     108: 'BITMAPV4HEADER',
     124: 'BITMAPV5HEADER',
-}
-
-DIB_HEADERS_TO_ATTRIBUTES = {
-    12: BITMAPCOREHEADER,
-    40: BITMAPINFOHEADER,
-    108: BITMAPV4HEADER,
-    124: BITMAPV5HEADER,
 }
 
 COLOR_PROFILE = {
